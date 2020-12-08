@@ -130,7 +130,7 @@ Taking following JSON files as examples, we can see that all the entries in thei
 So, we need to parse the data to a convinient structure in memory, for instance: numbers to a proper integral data type. We will call those structures: models.
 
 ### Models
-Models will read and parse the data from the files and put it in a memory dataset which will be a collection of records indexed by a *primary key*. The models will be also able to write the data in the files. We will use following structure and data types to model the data on the files:
+Models are a collection of labeled fields and will read and parse the data from the files and put it in a memory dataset which will be a collection of records indexed by a *primary key*. The models will be also able to write the data in the files. We will use following structure and data types to model the data on the files:
 
 From file *inventory.json* each **article** will have following fields:
 |Field name |Data type| JSON key |
