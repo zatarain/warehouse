@@ -158,54 +158,7 @@ The mapping for the articles will be a collection of pairs from integer (`art_id
 #### Data relationships
 We can see from the sample files that the relationship between products and articles is a many-to-many relationship (`N:M`). So, this implies that we need to take care of both when we update any instance of any entity in order to keep the data integrity.
 
-```mermaid
-classDiagram
-    model "1" -- "1..*" field
-    model <|.. product
-    model <|.. article
-    article "*" o-- "*" product
-
-    class field {
-        <<template<Type>>>
-        - key: string
-        - value: Type
-        + field(name)
-        + get(json::node) Type&
-        + set(json::node) void
-    }
-
-    class model {
-        <<abstract template<PrimaryKey>>>
-        # source: string
-        # entry: string
-        # filename: string
-        # document: json::document
-        # dataset: map<PrimaryKey, json::node>
-        # model(source)
-        # get_primary_key()* field<PrimeryKey>
-        + fetch() void
-        + read(...)* void
-        + write(...)* void
-        + commit() void
-    }
-
-    class article {
-        + id: field<int>
-        + name: field<string>
-        + stock: field<int>
-        + article()
-    }
-
-    class product {
-        + name: field<string>
-        + articles: field<map<int, int>>
-        + availability: field<int>
-        + product()
-        + get_availability() int
-        + update_availability() void
-        + sell(name: string) bool
-    }
-```
+![Class diagram for data models][data-models]
 
 ### User interaction
 ### Input
@@ -220,3 +173,5 @@ classDiagram
 # Implementation
 
 # Further work
+
+[data-models]: docs/img/data-models.png
