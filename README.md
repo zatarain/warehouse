@@ -1,6 +1,3 @@
----
-author: zatarain
----
 # Warehouse
 This project aims to be an exercise to discuss about software engineering technical topics like system design, testing, deployment, etcetera.
 
