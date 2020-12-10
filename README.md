@@ -137,10 +137,10 @@ From file *inventory.json* each **article** will have following fields:
 |stock      | integer | `stock`  |
 
 From file *products.json* each **product** will have following fields:
-|Field name |Data type| JSON key          |
-|:---       |  :---:  | :---              |
-|*name*     | string  | `name`            |
-|articles   |   map   | `contain_articles`|
+|Field name   |Data type| JSON key          |
+|:---         |  :---:  | :---              |
+|*name*       | string  | `name`            |
+|requirements |   map   | `contain_articles`|
 
 The mapping for the articles will be a collection of pairs from integer (`art_id`) to integer (`amount_of`).
 
