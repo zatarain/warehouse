@@ -10,6 +10,7 @@ classDiagram
         - key: string
         - value: Type
         + field(name)
+        + field(name, getter, setter)
         + get(json::node) Type&
         + set(json::node) void
     }
@@ -26,23 +27,31 @@ classDiagram
         + fetch() void
         + read(...)* void
         + write(...)* void
+        + exists(PrimaryKey) bool
         + commit() void
     }
 
     class article {
-        + id: field<int>
-        + name: field<string>
-        + stock: field<int>
+        - id: field<int>
+        - name: field<string>
+        - stock: field<int>
         + article()
+        + get_id() int
+        + get_name() string
+        + get_stock() int
+        + set_name(string)
+        + set_stock(int)
     }
 
     class product {
-        + name: field<string>
-        + articles: field<map<int, int>>
-        + availability: field<int>
-        + product()
+        - name: field<string>
+        - requirements: field<map<int, int>>
+        + product(article*)
         + get_availability() int
         + update_availability() void
-        + sell(name: string) bool
+        + get_name() string
+        + get_requirements() map<int,int>
+        + get_requirements_from() map<int,int>
+        + set_requirements_to()
     }
 ```
