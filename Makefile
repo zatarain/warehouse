@@ -37,6 +37,7 @@ ${BUILD}/${APPNAME}: ${OBJECTS}
 
 ${BUILD}/lib${APPNAME}.so:
 	echo "Compiling application under test..."
+	mkdir -p ${BUILD}/models
 	for source in ${SOURCES}; do\
 		object=${@D}/$${source#*/};\
 		object=$${object%.*}.o;\
