@@ -1,23 +1,23 @@
-# Warehouse
+# 1. Warehouse
 This project aims to be an exercise to discuss about software engineering technical topics like system design, testing, deployment, etcetera.
 
-## Overview
+## 1.1 Overview
 This simple application aims to manage a warehouse to hold articles, and the articles should contain an identification number, a name and available stock.
 
 The warehouse application will also have to manage products. Products are made of different articles. Products should have a name, price and a list of articles of which they are made from with a quantity.
 
 The data source for both (products and articles) will be text files in JSON format.
 
-## Tenets
+## 1.2 Tenets
 The primary values for the implementation will be: simplicity, readability, maintainability, testability. It should be easy to scan the code and rather quickly understand what it’s doing.
 
-### Scope
+### 1.2.1 Scope
 * Load the data from the JSON files.
 * Write the results on the JSON files.
 * Validate user input and data in the files.
 * Show the output to the user in JSON format.
 
-### Assumptions
+### 1.2.2 Assumptions
 * The application is not thread-safe.
 * The files are locally stored in specific folder with the specific provided names.
 * Since the data is on text files, we won't any implement transactional or ACID model.
@@ -25,10 +25,10 @@ The primary values for the implementation will be: simplicity, readability, main
 * Data in the text files is consistent as described below in **Data** subsection.
 * Encoding for the files will be assumed as UTF8.
 
-# Design
+# 2. Design
 Following subsections aim to briefly describe the desing of the solution, description of the data, the interactions with the user and expected behaviours.
 
-## Workflows
+## 2.1 Workflows
 The warehouse application will work in following way:
 1. Load the data from the files at the start of the application.
 2. Sequentially allow the user request following operations:
@@ -37,7 +37,7 @@ The warehouse application will work in following way:
     * Show the help for the application.
     * Exit from the application.
 
-### Load data
+### 2.1.1 Load data
 **Input:** None
 1. For each of the data files (products and inventory):
     1. Open the file
@@ -46,14 +46,14 @@ The warehouse application will work in following way:
 2. Make the link/join between products and articles.
 3. Compute the initial availability for all the products.
 
-### List all products
+### 2.1.2 List all products
 **Input:** None
 
 **Steps:**
 1. For each product:
    1. Print its name and availability
 
-### Sell a product
+### 2.1.3 Sell a product
 **Input:** Product name
 
 **Steps:**
@@ -68,13 +68,13 @@ The warehouse application will work in following way:
     2. Otherwise: tell to the user that product is unavailaible.
 5. Otherwise: tell to the user product doesn't exist.
 
-### Show help
+### 2.1.4 Show help
 **Input:** None
 
 **Steps:**
 1. Show brief description of the available operations with their expected input and output.
 
-### Exit
+### 2.1.5 Exit
 **Input:** None
 
 **Steps:**
@@ -82,7 +82,7 @@ The warehouse application will work in following way:
 2. Close the files properly.
 3. Terminate the application.
 
-## Data
+## 2.2 Data
 Taking following JSON files as examples, we can see that all the entries in their are either strings, list or objects:
 
 **inventory.json:**
@@ -126,7 +126,7 @@ Taking following JSON files as examples, we can see that all the entries in thei
 
 So, we need to parse the data to a convinient structure in memory, for instance: numbers to a proper integral data type. We will call those structures: models.
 
-### Models
+### 2.2.1 Models
 Models are a collection of labeled fields and will read and parse the data from the files and put it in a memory dataset which will be a collection of records indexed by a *primary key*. The models will be also able to write the data in the files. We will use following structure and data types to model the data on the files:
 
 From file *inventory.json* each **article** will have following fields:
@@ -144,7 +144,7 @@ From file *products.json* each **product** will have following fields:
 
 The mapping for the articles will be a collection of pairs from integer (`art_id`) to integer (`amount_of`).
 
-#### Consistency assumptions
+#### 2.2.1.1 Consistency assumptions
 * Each file has a main entry (`inventory` or `products`) which is a list.
 * Article IDs are unique and won't change.
 * All the integers on the file are actually strings.
@@ -152,7 +152,7 @@ The mapping for the articles will be a collection of pairs from integer (`art_id
 * The articles are not duplicated in the same product.
 * All the integers on the file are actually strings.
 
-#### Data relationships
+#### 2.2.1.2 Data relationships
 We can see from the sample files that the relationship between products and articles is a many-to-many relationship (`N:M`). So, this implies that we need to take care of both when we update any instance of any entity in order to keep the data integrity.
 
 ![Class diagram for data models][data-models]
