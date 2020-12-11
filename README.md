@@ -15,7 +15,7 @@ The primary values for the implementation will be: simplicity, readability, main
 * Load the data from the JSON files.
 * Write the results on the JSON files.
 * Validate user input and data in the files.
-* Show the output to the user in JSON format.
+* Show the output to the user in format `<Product Name>: <availability>`.
 
 ### 1.2.2 Assumptions
 * The application is not thread-safe.
@@ -108,7 +108,7 @@ Taking following JSON files as examples, we can see that all the entries in thei
 {
   "products": [
     {
-      "name": "Dining Chair",
+      "name": "Dinning Chair",
       "contain_articles": [
         {
           "art_id": "1",
@@ -157,18 +157,69 @@ We can see from the sample files that the relationship between products and arti
 
 ![Class diagram for data models][data-models]
 
-### User interaction
-### Input
-### Validations
-### Output
-### Views
+### 2.2.2 User interaction
+This application is designed as a back-end command line interface, once is started it receives request of following types by standard input:
 
-## Deployment
+* `list`: Shows the list of products.
+* `sell <Product Name>`: Sells a product if exists and is available.
+* `help`: Displays this information.
+* `exit`: Terminates the application writing inventory file before.
+* Otherwise: shows an error message.
 
-## Tests
+### 2.2.2.1 Input
+The only request type which receives an input is `sell`, this is the product name, for instance:
+```
+sell Dinning Chair
+```
 
-# Implementation
+### 2.2.2.2 Validations
+Following validations are applied:
+* Check whether the product name exists.
+* Check whether the product is available.
+* Check whether a requirement (article) exists.
 
-# Further work
+### 2.2.2.3 Output
+Following is expected to get in the standard output:
+* The `list` request shows the output to the user in format `<Product Name>: <availability>`.
+* A prompt message.
+* Error message in case of:
+    - The request of the user is not recognized.
+    - An article was not found.
+    - A product was not found.
+    - A product is not available.
+
+## 2.3 Deployment
+Docker container were used in order to deploy the application. So, once this repositorio is downloaded, the application can be deployed using:
+
+```
+docker image build -t warehouse:dev .
+```
+
+And it can be run by using:
+
+```
+docker run -i warehouse:dev
+```
+
+## 2.4 Tests
+In order to add some unit testing [utz][utz-library] has been used in the deployment. It's a library which stills in development by myself, but for the purpose of the excersice of show how this can be tested, I think should be enough. The test cases implemented are in the folder utz.
+
+# 3. Implementation
+The implementation is written in C++17 and relies on a JSON parsing library called [RapidJSON][rapid-json].
+
+Using M(V?)C design patter (so wi missed the view layer so far), the JSON files are parsed by the models (article and product) using the library and then warehouse controller uses those models.
+
+# 4. Further work
+* Add more test cases.
+* Add more documentation.
+* Add more validations or controls, for instance:
+    - check whether the user inputs an empty string as product name.
+    - trim the string of the product name input by user.
+    - integrity and consitency checks.
+* Make the application thread-safe.
+* Display the output in several formats, for instance implementing different views.
+* Support for different character sets not only UTF8.
 
 [data-models]: docs/img/data-models.png
+[utz-library]: https://github.com/zatarain/utz
+[rapid-json]: https://github.com/Tencent/rapidjson/releases/tag/v1.1.0
