@@ -1,23 +1,23 @@
-# Warehouse
+# 1. Warehouse
 This project aims to be an exercise to discuss about software engineering technical topics like system design, testing, deployment, etcetera.
 
-## Overview
+## 1.1 Overview
 This simple application aims to manage a warehouse to hold articles, and the articles should contain an identification number, a name and available stock.
 
 The warehouse application will also have to manage products. Products are made of different articles. Products should have a name, price and a list of articles of which they are made from with a quantity.
 
 The data source for both (products and articles) will be text files in JSON format.
 
-## Tenets
+## 1.2 Tenets
 The primary values for the implementation will be: simplicity, readability, maintainability, testability. It should be easy to scan the code and rather quickly understand what it’s doing.
 
-### Scope
+### 1.2.1 Scope
 * Load the data from the JSON files.
 * Write the results on the JSON files.
 * Validate user input and data in the files.
-* Show the output to the user in JSON format.
+* Show the output to the user in format `<Product Name>: <availability>`.
 
-### Assumptions
+### 1.2.2 Assumptions
 * The application is not thread-safe.
 * The files are locally stored in specific folder with the specific provided names.
 * Since the data is on text files, we won't any implement transactional or ACID model.
@@ -25,10 +25,10 @@ The primary values for the implementation will be: simplicity, readability, main
 * Data in the text files is consistent as described below in **Data** subsection.
 * Encoding for the files will be assumed as UTF8.
 
-# Design
+# 2. Design
 Following subsections aim to briefly describe the desing of the solution, description of the data, the interactions with the user and expected behaviours.
 
-## Workflows
+## 2.1 Workflows
 The warehouse application will work in following way:
 1. Load the data from the files at the start of the application.
 2. Sequentially allow the user request following operations:
@@ -37,7 +37,7 @@ The warehouse application will work in following way:
     * Show the help for the application.
     * Exit from the application.
 
-### Load data
+### 2.1.1 Load data
 **Input:** None
 1. For each of the data files (products and inventory):
     1. Open the file
@@ -46,14 +46,14 @@ The warehouse application will work in following way:
 2. Make the link/join between products and articles.
 3. Compute the initial availability for all the products.
 
-### List all products
+### 2.1.2 List all products
 **Input:** None
 
 **Steps:**
 1. For each product:
    1. Print its name and availability
 
-### Sell a product
+### 2.1.3 Sell a product
 **Input:** Product name
 
 **Steps:**
@@ -68,13 +68,13 @@ The warehouse application will work in following way:
     2. Otherwise: tell to the user that product is unavailaible.
 5. Otherwise: tell to the user product doesn't exist.
 
-### Show help
+### 2.1.4 Show help
 **Input:** None
 
 **Steps:**
 1. Show brief description of the available operations with their expected input and output.
 
-### Exit
+### 2.1.5 Exit
 **Input:** None
 
 **Steps:**
@@ -82,7 +82,7 @@ The warehouse application will work in following way:
 2. Close the files properly.
 3. Terminate the application.
 
-## Data
+## 2.2 Data
 Taking following JSON files as examples, we can see that all the entries in their are either strings, list or objects:
 
 **inventory.json:**
@@ -108,7 +108,7 @@ Taking following JSON files as examples, we can see that all the entries in thei
 {
   "products": [
     {
-      "name": "Dining Chair",
+      "name": "Dinning Chair",
       "contain_articles": [
         {
           "art_id": "1",
@@ -126,7 +126,7 @@ Taking following JSON files as examples, we can see that all the entries in thei
 
 So, we need to parse the data to a convinient structure in memory, for instance: numbers to a proper integral data type. We will call those structures: models.
 
-### Models
+### 2.2.1 Models
 Models are a collection of labeled fields and will read and parse the data from the files and put it in a memory dataset which will be a collection of records indexed by a *primary key*. The models will be also able to write the data in the files. We will use following structure and data types to model the data on the files:
 
 From file *inventory.json* each **article** will have following fields:
@@ -144,7 +144,7 @@ From file *products.json* each **product** will have following fields:
 
 The mapping for the articles will be a collection of pairs from integer (`art_id`) to integer (`amount_of`).
 
-#### Consistency assumptions
+#### 2.2.1.1 Consistency assumptions
 * Each file has a main entry (`inventory` or `products`) which is a list.
 * Article IDs are unique and won't change.
 * All the integers on the file are actually strings.
@@ -152,23 +152,74 @@ The mapping for the articles will be a collection of pairs from integer (`art_id
 * The articles are not duplicated in the same product.
 * All the integers on the file are actually strings.
 
-#### Data relationships
+#### 2.2.1.2 Data relationships
 We can see from the sample files that the relationship between products and articles is a many-to-many relationship (`N:M`). So, this implies that we need to take care of both when we update any instance of any entity in order to keep the data integrity.
 
 ![Class diagram for data models][data-models]
 
-### User interaction
-### Input
-### Validations
-### Output
-### Views
+### 2.2.2 User interaction
+This application is designed as a back-end command line interface, once is started it receives request of following types by standard input:
 
-## Deployment
+* `list`: Shows the list of products.
+* `sell <Product Name>`: Sells a product if exists and is available.
+* `help`: Displays this information.
+* `exit`: Terminates the application writing inventory file before.
+* Otherwise: shows an error message.
 
-## Tests
+### 2.2.2.1 Input
+The only request type which receives an input is `sell`, this is the product name, for instance:
+```
+sell Dinning Chair
+```
 
-# Implementation
+### 2.2.2.2 Validations
+Following validations are applied:
+* Check whether the product name exists.
+* Check whether the product is available.
+* Check whether a requirement (article) exists.
 
-# Further work
+### 2.2.2.3 Output
+Following is expected to get in the standard output:
+* The `list` request shows the output to the user in format `<Product Name>: <availability>`.
+* A prompt message.
+* Error message in case of:
+    - The request of the user is not recognized.
+    - An article was not found.
+    - A product was not found.
+    - A product is not available.
+
+## 2.3 Deployment
+Docker container were used in order to deploy the application. So, once this repositorio is downloaded, the application can be deployed using:
+
+```
+docker image build -t warehouse:dev .
+```
+
+And it can be run by using:
+
+```
+docker run -i warehouse:dev
+```
+
+## 2.4 Tests
+In order to add some unit testing [utz][utz-library] has been used in the deployment. It's a library which stills in development by myself, but for the purpose of the excersice of show how this can be tested, I think should be enough. The test cases implemented are in the folder utz.
+
+# 3. Implementation
+The implementation is written in C++17 and relies on a JSON parsing library called [RapidJSON][rapid-json].
+
+Using M(V?)C design patter (so wi missed the view layer so far), the JSON files are parsed by the models (article and product) using the library and then warehouse controller uses those models.
+
+# 4. Further work
+* Add more test cases.
+* Add more documentation.
+* Add more validations or controls, for instance:
+    - check whether the user inputs an empty string as product name.
+    - trim the string of the product name input by user.
+    - integrity and consitency checks.
+* Make the application thread-safe.
+* Display the output in several formats, for instance implementing different views.
+* Support for different character sets not only UTF8.
 
 [data-models]: docs/img/data-models.png
+[utz-library]: https://github.com/zatarain/utz
+[rapid-json]: https://github.com/Tencent/rapidjson/releases/tag/v1.1.0
