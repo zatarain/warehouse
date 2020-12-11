@@ -1,13 +1,14 @@
 #ifndef MODEL_HEADER
 #define MODEL_HEADER
 
-#include <iostream>
-#include <string>
+#include <algorithm>
 #include <fstream>
-#include <sstream>
+#include <iostream>
 #include <map>
 #include <set>
-#include <algorithm>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 
 #include <rapidjson/document.h>
 #include <rapidjson/istreamwrapper.h>
@@ -48,7 +49,7 @@ namespace models {
 		virtual void operator<<(json::Value&) = 0;
 		virtual void operator>>(json::Value&) = 0;
 
-		std::string not_found(const PrimaryKey&);
+		std::exception invalid_key(const PrimaryKey&);
 
 		template<typename Field>
 		void read(json::Value&, Field&);
@@ -107,17 +108,17 @@ void model<PrimaryKey>::fetch() {
 }
 
 template<typename PrimaryKey>
-std::string model<PrimaryKey>::not_found(const PrimaryKey& key) {
-	std::stringstream error;
-	error << "Record with key = '" << key << "' not found!";
-	return error.str();
+std::exception model<PrimaryKey>::invalid_key(const PrimaryKey& key) {
+	std::stringstream message;
+	message << "Record with key = '" << key << "' not found!";
+	return std::invalid_argument(message.str());
 }
 
 template<typename PrimaryKey>
 void model<PrimaryKey>::read() {
 	primary_key key = get_primary_key();
 	if (!exists(key)) {
-		throw not_found(key);
+		throw invalid_key(key);
 	}
 	*this << dataset[key];
 }
@@ -152,7 +153,7 @@ template<typename PrimaryKey>
 void model<PrimaryKey>::write() {
 	primary_key key = get_primary_key();
 	if (!exists(key)) {
-		throw not_found(key);
+		throw invalid_key(key);
 	}
 	*this >> dataset[key];
 }

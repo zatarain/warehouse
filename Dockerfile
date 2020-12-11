@@ -13,4 +13,4 @@ RUN make install && rm -rf aut
 WORKDIR /root
 RUN utz test
 RUN make out/warehouse
-ENTRYPOINT out/warehouse
+ENTRYPOINT ["out/warehouse"]
