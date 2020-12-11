@@ -10,7 +10,7 @@ void utz::test() {
 
 	// Stream to inject the input.
 	std::stringstream input;
-	input << "list" << std::endl << "exit" << std::endl;
+	input << std::endl << "exit" << std::endl;
 	// Stream to capture the output.
 	std::stringstream output;
 
@@ -30,7 +30,7 @@ void utz::test() {
 	std::cin.rdbuf(old_input_buffer);
 
 	std::stringstream expected_output;
-	expected_output << "Hello list!" << std::endl << "Bye! :)" << std::endl;
+	expected_output << "Bye! :)" << std::endl;
 	"main call puts the expected phrases to standard output with an end-of-line mark."
 		| expect(output.str(), is::equal, expected_output.str());
 
