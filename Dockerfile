@@ -5,7 +5,9 @@ ENV LD_LIBRARY_PATH=/usr/local/lib \
 RUN echo "${TERM}" && tabs -4
 WORKDIR /root
 RUN apt-get update && apt-get -y install jq && rm -rf /var/lib/apt/lists/*
-RUN git clone --depth 1 --branch v1.1.0 https://github.com/Tencent/rapidjson.git
+RUN git clone --depth 1 --branch v1.1.0 https://github.com/Tencent/rapidjson.git \
+	&& mv rapidjson/include/rapidjson /usr/include/rapidjson \
+	&& rm -rf rapidjson
 RUN git clone https://github.com/zatarain/utz.git
 COPY . .
 WORKDIR /root/utz

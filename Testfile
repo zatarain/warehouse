@@ -2,7 +2,7 @@ sources:        src
 output:         out
 test-cases:     utz
 compiler:       clang++ -std=c++17 -stdlib=libc++
-compiler-flags: -Wall -Wno-comment -fPIC -pipe -I*sources/ -Irapidjson/include
+compiler-flags: -Wall -Wno-comment -fPIC -pipe -I*sources/
 coverage-flags: -fcoverage-mapping -g -O0
 coverage:       *output/coverage
 linker-flags:   *coverage-flags -shared -fprofile-instr-generate

@@ -18,7 +18,7 @@ get_source(){
 SOURCES=$(find $SOURCE/ -type f -name '*.cpp')
 OBJECTS=$(get_object "$SOURCES")
 CXX="clang++ -std=c++17 -stdlib=libc++"
-CXXFLAGS="-Wall -Wno-comment -fPIC -O2 -pipe -I${SOURCE}/ -Irapidjson/include"
+CXXFLAGS="-Wall -Wno-comment -fPIC -O2 -pipe -I${SOURCE}/"
 
 target="$1"
 case "$target" in

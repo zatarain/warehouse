@@ -13,7 +13,7 @@ CXX        = clang++ -std=c++17 -stdlib=libc++
 # Macro/variables specific for the library
 SOURCES  = `find ${SRCDIR}/ -type f -name "*.cpp"`
 BUILD      = out
-CXXFLAGS   = -Wall -Wno-comment -fPIC -O2 -pipe -I${SRCDIR}/ -Irapidjson/include
+CXXFLAGS   = -Wall -Wno-comment -fPIC -O2 -pipe -I${SRCDIR}/
 LXXFLAGS   =
 COVFLAGS   = -fcoverage-mapping -fprofile-instr-generate -g -O0
 LUTFLAGS   = ${COVFLAGS} -shared
