@@ -13,8 +13,7 @@
 
 namespace models {
 	using list_of_articles = std::map<int, int>;
-
-	class product: public model<std::string> {
+	class product: public model<std::string, case_insensitive_less> {
 	public:
 		product(article*);
 		inline primary_key& get_primary_key() override { return name; }

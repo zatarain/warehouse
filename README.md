@@ -148,7 +148,7 @@ The mapping for the articles will be a collection of pairs from integer (`art_id
 * Each file has a main entry (`inventory` or `products`) which is a list.
 * Article IDs are unique and won't change.
 * All the integers on the file are actually strings.
-* Product names are unique, case sensitive and won't change.
+* Product names are unique ~~case sensitive~~ and won't change.
 * The articles are not duplicated in the same product.
 * All the integers on the file are actually strings.
 

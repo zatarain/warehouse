@@ -20,7 +20,12 @@
 namespace json = rapidjson;
 
 namespace models {
-	template<typename PrimaryKey>
+	struct case_insensitive_less {
+		bool operator()(const unsigned char&, const unsigned char&) const;
+		bool operator()(const std::string&, const std::string&) const;
+	};
+
+	template<typename PrimaryKey, typename Comparator = std::less<PrimaryKey>>
 	class model {
 	public:
 		model() = delete;
@@ -39,7 +44,7 @@ namespace models {
 		std::string entry;
 		std::string filename;
 		json::Document document;
-		std::map<PrimaryKey, json::Value> dataset;
+		std::map<PrimaryKey, json::Value, Comparator> dataset;
 
 		model(const std::string&);
 		model(const std::string&, const std::string&);
@@ -49,7 +54,7 @@ namespace models {
 		virtual void operator<<(json::Value&) = 0;
 		virtual void operator>>(json::Value&) = 0;
 
-		std::exception invalid_key(const PrimaryKey&);
+		std::exception invalid_key(const PrimaryKey&) const;
 
 		template<typename Field>
 		void read(json::Value&, Field&);
@@ -70,18 +75,26 @@ namespace models {
 
 using models::model;
 
-template<typename PrimaryKey>
-const std::string model<PrimaryKey>::path("data");
-template<typename PrimaryKey>
-const std::string model<PrimaryKey>::ds("/");
-template<typename PrimaryKey>
-const std::string model<PrimaryKey>::extension("json");
+bool models::case_insensitive_less::operator()(const unsigned char& a, const unsigned char& b) const {
+	return std::tolower(a) < std::tolower(b);
+}
 
-template<typename PrimaryKey>
-model<PrimaryKey>::model(const std::string& source): model(source, source) { }
+bool models::case_insensitive_less::operator()(const std::string& a, const std::string& b) const {
+	return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end(), *this);
+}
 
-template<typename PrimaryKey>
-model<PrimaryKey>::model(const std::string& source, const std::string& entry):
+template<typename PrimaryKey, typename Comparator>
+const std::string model<PrimaryKey, Comparator>::path("data");
+template<typename PrimaryKey, typename Comparator>
+const std::string model<PrimaryKey, Comparator>::ds("/");
+template<typename PrimaryKey, typename Comparator>
+const std::string model<PrimaryKey, Comparator>::extension("json");
+
+template<typename PrimaryKey, typename Comparator>
+model<PrimaryKey, Comparator>::model(const std::string& source): model(source, source) { }
+
+template<typename PrimaryKey, typename Comparator>
+model<PrimaryKey, Comparator>::model(const std::string& source, const std::string& entry):
 source(source), entry(entry) {
 	std::stringstream filename;
 	filename << path << ds << source << '.' << extension;
@@ -89,15 +102,15 @@ source(source), entry(entry) {
 	parse();
 }
 
-template<typename PrimaryKey>
-void model<PrimaryKey>::parse() {
+template<typename PrimaryKey, typename Comparator>
+void model<PrimaryKey, Comparator>::parse() {
 	std::ifstream input(filename);
 	json::IStreamWrapper reader(input);
 	document.ParseStream(reader);
 }
 
-template<typename PrimaryKey>
-void model<PrimaryKey>::fetch() {
+template<typename PrimaryKey, typename Comparator>
+void model<PrimaryKey, Comparator>::fetch() {
 	json::Value recordset;
 	primary_key& key = get_primary_key();
 	recordset = document[entry.c_str()];
@@ -107,15 +120,15 @@ void model<PrimaryKey>::fetch() {
 	}
 }
 
-template<typename PrimaryKey>
-std::exception model<PrimaryKey>::invalid_key(const PrimaryKey& key) {
+template<typename PrimaryKey, typename Comparator>
+std::exception model<PrimaryKey, Comparator>::invalid_key(const PrimaryKey& key) const {
 	std::stringstream message;
 	message << "Record with key = '" << key << "' not found!";
 	return std::invalid_argument(message.str());
 }
 
-template<typename PrimaryKey>
-void model<PrimaryKey>::read() {
+template<typename PrimaryKey, typename Comparator>
+void model<PrimaryKey, Comparator>::read() {
 	primary_key key = get_primary_key();
 	if (!exists(key)) {
 		throw invalid_key(key);
@@ -123,19 +136,19 @@ void model<PrimaryKey>::read() {
 	*this << dataset[key];
 }
 
-template<typename PrimaryKey>
+template<typename PrimaryKey, typename Comparator>
 template<typename Field>
-inline void model<PrimaryKey>::read(json::Value& node, Field& field) { field.get(node); }
+inline void model<PrimaryKey, Comparator>::read(json::Value& node, Field& field) { field.get(node); }
 
-template<typename PrimaryKey>
+template<typename PrimaryKey, typename Comparator>
 template<typename Field, typename... Arguments>
-void model<PrimaryKey>::read(json::Value& node, Field& field, Arguments&... arguments) {
+void model<PrimaryKey, Comparator>::read(json::Value& node, Field& field, Arguments&... arguments) {
 	field.get(node);
 	read(node, arguments...);
 }
 
-template<typename PrimaryKey>
-void model<PrimaryKey>::commit() {
+template<typename PrimaryKey, typename Comparator>
+void model<PrimaryKey, Comparator>::commit() {
 	json::Value list(json::kArrayType);
 	json::Document::AllocatorType& allocator = document.GetAllocator();
 	for (auto& [id, node]: dataset) {
@@ -149,8 +162,8 @@ void model<PrimaryKey>::commit() {
 	document.Accept(writer);
 }
 
-template<typename PrimaryKey>
-void model<PrimaryKey>::write() {
+template<typename PrimaryKey, typename Comparator>
+void model<PrimaryKey, Comparator>::write() {
 	primary_key key = get_primary_key();
 	if (!exists(key)) {
 		throw invalid_key(key);
@@ -158,19 +171,19 @@ void model<PrimaryKey>::write() {
 	*this >> dataset[key];
 }
 
-template<typename PrimaryKey>
+template<typename PrimaryKey, typename Comparator>
 template<typename Field>
-inline void model<PrimaryKey>::write(json::Value& node, Field& field) { field.set(node); }
+inline void model<PrimaryKey, Comparator>::write(json::Value& node, Field& field) { field.set(node); }
 
-template<typename PrimaryKey>
+template<typename PrimaryKey, typename Comparator>
 template<typename Field, typename... Arguments>
-void model<PrimaryKey>::write(json::Value& node, Field& field, Arguments&... arguments) {
+void model<PrimaryKey, Comparator>::write(json::Value& node, Field& field, Arguments&... arguments) {
 	field.set(node);
 	write(node, arguments...);
 }
 
-template<typename PrimaryKey>
-std::set<PrimaryKey> model<PrimaryKey>::get_all_keys() {
+template<typename PrimaryKey, typename Comparator>
+std::set<PrimaryKey> model<PrimaryKey, Comparator>::get_all_keys() {
 	std::set<PrimaryKey> keys;
 	auto key_extractor = [](const std::pair<const PrimaryKey, json::Value>& entry) {
 		return entry.first;
@@ -183,11 +196,11 @@ std::set<PrimaryKey> model<PrimaryKey>::get_all_keys() {
 	return keys;
 }
 
-template<typename PrimaryKey>
-inline bool model<PrimaryKey>::exists(const PrimaryKey& key) { return dataset.count(key); }
+template<typename PrimaryKey, typename Comparator>
+inline bool model<PrimaryKey, Comparator>::exists(const PrimaryKey& key) { return dataset.count(key); }
 
-template<typename PrimaryKey>
-bool model<PrimaryKey>::read(const PrimaryKey& key) {
+template<typename PrimaryKey, typename Comparator>
+bool model<PrimaryKey, Comparator>::read(const PrimaryKey& key) {
 	if (!exists(key)) return false;
 
 	primary_key& primary = get_primary_key();
@@ -196,8 +209,8 @@ bool model<PrimaryKey>::read(const PrimaryKey& key) {
 	return true;
 }
 
-template<typename PrimaryKey>
-bool model<PrimaryKey>::write(const PrimaryKey& key) {
+template<typename PrimaryKey, typename Comparator>
+bool model<PrimaryKey, Comparator>::write(const PrimaryKey& key) {
 	return true;
 }
 
