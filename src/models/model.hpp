@@ -54,7 +54,7 @@ namespace models {
 		virtual void operator<<(json::Value&) = 0;
 		virtual void operator>>(json::Value&) = 0;
 
-		std::exception invalid_key(const PrimaryKey&) const;
+		std::invalid_argument invalid_key(const PrimaryKey&) const;
 
 		template<typename Field>
 		void read(json::Value&, Field&);
@@ -121,7 +121,7 @@ void model<PrimaryKey, Comparator>::fetch() {
 }
 
 template<typename PrimaryKey, typename Comparator>
-std::exception model<PrimaryKey, Comparator>::invalid_key(const PrimaryKey& key) const {
+std::invalid_argument model<PrimaryKey, Comparator>::invalid_key(const PrimaryKey& key) const {
 	std::stringstream message;
 	message << "Record with key = '" << key << "' not found!";
 	return std::invalid_argument(message.str());

@@ -47,8 +47,11 @@ private:
 void utz::test() {
 	utz::log << "Test cases for model." << std::endl;
 	item record;
-	record.read(2);
+
 	utz::log << "Cheking that the model reads the JSON file properly." << std::endl;
+	"Reading an existent record based-on the key returns true."
+		| expect(record.read(2), is::equal, true);
+
 	"Field tagged with 'id' was read correctly."
 		| expect((int)record.id, is::equal, 2);
 
@@ -60,5 +63,9 @@ void utz::test() {
 
 	"Field tagged with 'quantity' was read correctly."
 		| expect(std::abs(4.31f - record.quantity) <= 1e-6, is::equal, true);
+
+	"Try to read an inexistent returns false."
+		| expect(record.read(0), is::equal, false);
+
 	utz::log << "End of test cases for model." << std::endl;
 }
